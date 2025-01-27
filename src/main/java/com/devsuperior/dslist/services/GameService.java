@@ -1,8 +1,11 @@
 package com.devsuperior.dslist.services;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
+import com.devsuperior.dslist.dto.GeneralErrorDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +20,16 @@ public class GameService {
 	
 	@Autowired
 	private GameRepository gameRepository;
-	
+
 	@Transactional(readOnly = true)
-	public GameDTO findById(Long id) {
-		Game result = gameRepository.findById(id).get();
-		return new GameDTO(result);  
+	public ResponseEntity<Object> findById(Long id) {
+		try {
+			Game result = gameRepository.findById(id).get();
+			return ResponseEntity.ok(new GameDTO(result));
+		} catch (NoSuchElementException e) {
+			GeneralErrorDTO error = new GeneralErrorDTO("Game not found with id: " + id);
+			return ResponseEntity.status(404).body(error);
+		}
 	}
 
 	@Transactional(readOnly = true)
